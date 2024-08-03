@@ -8,7 +8,7 @@ export interface ICard {
     
 }
 
-export interface IUserData {
+export interface IFormData {
     methodPay: string;
     adress: string;
     email: string;
@@ -29,8 +29,17 @@ export interface IBasket {
     deleteCard(id: string): void;
 }
 
+export interface IPage {
+    counter: number;
+    cardsList: ICard[];
+}
+
+export  interface ISuccess {
+    totalPrice: number;
+}
+
 export type TCardCatalog = Pick<ICard, "id" |  "image" | "tittle" | "category" | "price">;
 export type TCardBasket = Pick<ICard, "tittle" | "price">;
-export type TUserDataOneStep = Pick<IUserData, "methodPay" | "adress">;
-export type TUserDataTwoStep = Pick<IUserData, "email" | "phone">;
+export type TUserDataOneStep = Pick<IFormData, "methodPay" | "adress">;
+export type TUserDataTwoStep = Pick<IFormData, "email" | "phone">;
 
