@@ -49,7 +49,7 @@ yarn build
 Карточка товара 
 
 ```
-export interface ICard {
+interface ICard {
     id: string;
     description: string;
     image: string;
@@ -59,30 +59,33 @@ export interface ICard {
 }
 ```
 
-Данные пользователя 
-
-```
-export interface IuserData {
-    methodPay: string;
-    adress: string;
-    email: string;
-    phone: string;
-}
-```
-
 Интерфейс для хранения карточек
 
 ```
-export interface IcardsData {
-    cards: ICard[];
-    preview: string | null;
+interface IcardsData {
+    _cards: ICard[];
+    _preview: string | null;
+    setCards(cards: ICard[]): void;
+    setPreview(item: ICard): void;
+}
+```
+
+Интерфейс для хранения данных пользователя 
+
+```
+interface IuserData {
+    _methodPay: methodPay;
+    _adress: string;
+    _email: string;
+    _phone: string;
+    _events : IEvents;
 }
 ```
 
 Интерфейс для хранения данных корзины
 
 ```
-export interface IBasket {
+interface IBasket {
     cards: ICard[] | null;
     totalPrice: number;
     counter: number;
@@ -92,31 +95,31 @@ export interface IBasket {
 Данные карточки отражаемой в списке карточек на главной странице
 
 ```
-export type TCardItemPage = Pick<ICard, "id" |  "image" | "tittle" | "category" | "price">;
+type TCardItemPage = Pick<ICard, "id" |  "image" | "tittle" | "category" | "price">;
 ```
 
 Данные карточки при открытии попапа с детальной информацией о карточке
 
 ```
-export type TCard = Pick<ICard, "id" | "description"| "image" | "tittle" | "category" | "price">;
+type TCard = Pick<ICard, "id" | "description"| "image" | "tittle" | "category" | "price">;
 ```
 
 Данные карточки в корзине
 
 ```
-export type TCardBasket = Pick<ICard, "id" |"tittle" | "price">;
+type TCardBasket = Pick<ICard, "id" |"tittle" | "price">;
 ```
 
 Данные пользователя вводимые на первом шаге при оформлении 
 
 ```
-export type TUserDataOne = Pick<IuserData, "methodPay" | "adress">;
+type TUserDataOne = Pick<IuserData, "methodPay" | "adress">;
 ```
 
 Данные пользователя вводимые на втором шаге при оформлении
 
 ```
-export type TUserDataTwo = Pick<IuserData, "email" | "phone">;
+type TUserDataTwo = Pick<IuserData, "email" | "phone">;
 ```
 
 ## Архитектура проекта
@@ -190,13 +193,68 @@ preview: string | null -  строка, представляющая id карт
 events: IEvents - экземпляр класса EventEmitter, для инициализации событий при изменении данных;
 ```
 
-Для взаимодействия с данными используется метод  
+Для взаимодействия с данными используются методы:
 
 ```
-getCard(id: string): ICard - метод для получения карты из коллекции по её идентификатору. Принимает идентификатор карты в виде строки и возвращает объект ICard, соответствующий этому идентификатору.
+setCards(cards: ICard[]): void; - метод для получения коллекции карт. Принимает массив объектов типа ICard и записывает их в свойство _cards.
 ```
 
-#### Класс BasketModel
+```
+setPreview(item: ICard): void - метод для получения карты из коллекции по её идентификатору. Принимает идентификатор карты в виде строки и возвращает объект ICard, соответствующий этому идентификатору.
+```
+
+```
+getCards(): ICard[]; - метод для получения коллекции карт. Возвращает текущее значение свойства _cards.
+```
+
+#### Класс UserData
+
+Класс представляет собой структуру данных для управления данными пользователя.
+```
+    methodPay: methodPay; - метод оплаты (оплата картой или наличными).
+```
+```
+    adress: string; - адрес доставки вводимый пользователем.
+```
+```
+    email: string; - электронная почта вводимая пользователем.
+```
+```
+    phone: string; - номер телефона вводимый пользователем.
+```
+```
+    events : IEvents; - экземпляр класса EventEmitter, для инициализации событий при изменении данных.
+```
+
+Для взаимодействия с данными используются методы:
+
+```
+get MethodPay - метод для получения метода оплаты. Возвращает текущее значение свойства _methodPay.
+```
+```
+set MethodPay(): methodPay; - метод для записи метода оплаты. Принимает значение типа methodPay и записывает его в свойство _methodPay.
+```
+```
+get Adress - метод для получения адреса. Возвращает текущее значение свойства _adress.
+```
+```
+set Adress(): string; - метод для записи адреса. Принимает значение типа string и записывает его в свойство _adress.
+```
+```
+get Email - метод для получения электронной почты. Возвращает текущее значение свойства _email.
+```
+```
+set Email(): string; - метод для записи электронной почты. Принимает значение типа string и записывает его в свойство _email.
+```
+```
+get Phone - метод для получения номера телефона. Возвращает текущее значение свойства _phone.
+```
+```
+set Phone(): string; - метод для записи номера телефона. Принимает значение типа string и записывает его в свойство _phone.
+```
+
+
+#### Класс BasketData
 
 Класс представляет собой корзину для хранения карт (например, товаров) и управления ими. Он включает в себя свойства и методы для работы с картами, отслеживания их количества и общей стоимости.
 
@@ -226,7 +284,21 @@ addCard(card: ICard): void: Метод для добавления новой к
 deleteCard(id: string): void: Метод для удаления карты из корзины. Принимает идентификатор карты в виде строки и удаляет соответствующую карту из массива cards, уменьшая значение totalPrice на стоимость удаленной карты и counter на единицу.
 ```
 
+```
+getCardIndex(item: ICard): number; Метод для получения индекса карты. Принимает объект ICard и возвращает его индекс в массиве cardsBasket.
+```
 
+```
+clearBasket(): void; Метод для очистки корзины. Удаляет все карты из массива cardsBasket, обнуляет значения totalPrice и counter.
+```
+
+```
+get BasketCounter(): number; Метод для получения количества карт в корзине. Возвращает значение свойства counter.
+```
+
+```
+get BasketTotalPrice(): number; Метод для получения общей стоимости карт в корзине. Возвращает значение свойства totalPrice.
+```
 
 ### Слой представления (View)
 

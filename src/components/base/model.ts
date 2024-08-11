@@ -1,4 +1,4 @@
-import {IEvents} from "./events";
+import {IEvents} from "./Events";
 
 export abstract class Model<T> {
     constructor(data: Partial<T>, protected events: IEvents) {
@@ -10,6 +10,4 @@ export abstract class Model<T> {
         // Состав данных можно модифицировать
         this.events.emit(event, payload ?? {});
     }
-
-    // далее можно добавить общие методы для моделей
 }
