@@ -3,13 +3,29 @@ import { CardsData } from './components/CardsData';
 import { Basket } from './components/BasketData';
 import { UserData } from './components/UserData';
 import './scss/styles.scss';
-import { ICard } from './types';
+import { ICard, ILarekApi, IUserData } from './types';
+import { LarekApi } from './components/LarekApi';
+import { API_URL, settings } from './utils/constants';
+import { Api } from './components/base/Api';
 
 const events = new EventEmitter();
+
+const _api: ILarekApi = new Api(API_URL, settings);
+const larekApi = new LarekApi(_api);
+
 
 const cardsData = new CardsData(events);
 const userData = new UserData(events);
 const basket = new Basket(events);
+
+// запрос карточек с сервера
+larekApi.getCards()
+.then((res) => {
+    cardsData.setCards(res);
+})
+.catch((error) => {
+    console.log(error);
+})
 
 
 // тестовые карточки

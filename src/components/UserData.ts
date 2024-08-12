@@ -2,37 +2,41 @@ import { IUserData, methodPay } from "../types";
 import { IEvents } from "./base/Events";
 
 export class UserData implements IUserData {
-    _methodPay: methodPay;
-    _adress: string;
-    _email: string;
-    _phone: string;
-    _events : IEvents;
+    payment: methodPay;
+    address: string;
+    email: string;
+    phone: string;
+    events : IEvents;
+    total: number;
+    items: string[];
+
     constructor(events: IEvents) {
-        this._events = events;
+        this.events = events;
     }
 
+
     get MethodPay(): methodPay { 
-        return this._methodPay;
+        return this.payment;
     } 
     set MethodPay(value: methodPay) {
-        this._methodPay = value;
+        this.payment = value;
     }
     get Adress(): string {
-        return this._adress;
+        return this.address;
     }
     set Adress(value: string) {
-        this._adress = value;
+        this.address = value;
     }
     get Email(): string {
-        return this._email;
+        return this.email;
     }
     set Email(value: string) {
-        this._email = value;
+        this.email = value;
     }
     get Phone(): string {
-        return this._phone;
+        return this.phone;
     }
     set Phone(value: string) {
-        this._phone = value;
+        this.phone = value;
     }
 }

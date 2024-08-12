@@ -1,3 +1,5 @@
+
+
 export interface ICard {
     id: string;
     description: string;
@@ -9,10 +11,12 @@ export interface ICard {
 }
 
 export interface IUserData {
-    _methodPay: string;
-    _adress: string;
-    _email: string;
-    _phone: string;
+    payment: string;
+    address: string;
+    email: string;
+    phone: string;
+    total: number;
+    items: string[];
 }
 
 export interface ICardsData {
@@ -57,6 +61,13 @@ export interface IForm {
 
 export type TCardCatalog = Pick<ICard, "id" |  "image" | "title" | "category" | "price">;
 export type TCardBasket = Pick<ICard, "title" | "price">;
-export type TUserDataOneStep = Pick<IUserData, "_methodPay" | "_adress">;
-export type TUserDataTwoStep = Pick<IUserData, "_email" | "_phone">;
-export type methodPay = "Оплата картой" | "Оплата наличными"
+export type TUserDataOneStep = Pick<IUserData, "payment" | "address">;
+export type TUserDataTwoStep = Pick<IUserData, "email" | "phone">;
+export type methodPay = "online" | "cash";
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
+
+export interface ILarekApi {
+    baseUrl: string;
+    get<T>(uri: string): Promise<T>;
+    post<T>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
+}
