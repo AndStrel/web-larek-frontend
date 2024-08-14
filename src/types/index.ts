@@ -20,8 +20,8 @@ export interface IUserData {
 }
 
 export interface ICardsData {
-    _cards: ICard[];
-    _preview: string | null;
+    cards: ICard[];
+    preview: string | null;
     setCards(cards: ICard[]): void;
     setPreview(item: ICard): void;
     getCards(): ICard[];
@@ -42,8 +42,9 @@ export interface IBasketData {
 }
 
 export interface IPage {
-    counter: number;
-    cardsList: ICard[];
+	counter: number;
+	gallery: HTMLElement[];
+	locked: boolean;
 }
 
 export  interface ISuccess {
@@ -68,6 +69,7 @@ export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
 export interface ILarekApi {
     baseUrl: string;
+    cdnUrl: string;
     get<T>(uri: string): Promise<T>;
     post<T>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }

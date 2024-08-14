@@ -1,121 +1,95 @@
 import { EventEmitter } from './components/base/Events';
 import { CardsData } from './components/CardsData';
-import { Basket } from './components/BasketData';
+import { Basket } from './components/Basket';
 import { UserData } from './components/UserData';
 import './scss/styles.scss';
 import { ICard, ILarekApi, IUserData } from './types';
 import { LarekApi } from './components/LarekApi';
-import { API_URL, settings } from './utils/constants';
+import { API_URL, CDN_URL, settings } from './utils/constants';
 import { Api } from './components/base/Api';
+import { Card } from './components/Card';
+import { cloneTemplate, ensureElement } from './utils/utils';
+import { testCards } from './utils/testData';
+import { Page } from './components/Page';
 
 const events = new EventEmitter();
 
-const _api: ILarekApi = new Api(API_URL, settings);
-const larekApi = new LarekApi(_api);
-
+// const _api: ILarekApi = new Api(API_URL, CDN_URL, settings);
+const larekApi = new LarekApi(API_URL, CDN_URL);
 
 const cardsData = new CardsData(events);
 const userData = new UserData(events);
 const basket = new Basket(events);
+const cardsConteiner = new Page(
+	document.querySelector('.gallery'),
+	events
+);
+// слушатель всех событий выводящий в консоль название события и его данные
+events.onAll((event) => {
+	console.log(event.eventName, event.data);
+});
 
 // запрос карточек с сервера
-larekApi.getCards()
-.then((res) => {
-    cardsData.setCards(res);
-})
-.catch((error) => {
-    console.log(error);
-})
+larekApi
+	.getCards()
+	.then((items) => {
+		// записываем полученный массив данных в cardsData
+		cardsData.setCards(items);
+	})
+	.then(() => {
+		// устанавливаем первую карточку в  превью для теста
+		// testSection.append(cardPreview.render(cardsData.cards[1]));
+	})
+	.catch((error) => {
+		console.log(error);
+	});
 
+// переменные контейнеров для шаблонов
+const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
+const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
+const cardBasketTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
+const basketTemplate = ensureElement<HTMLTemplateElement>('#basket');
+const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
+const contactsTemplate = ensureElement<HTMLTemplateElement>('#contacts');
+const successTemplate = ensureElement<HTMLTemplateElement>('#success');
 
-// тестовые карточки
-const testCards: ICard[] = [
-        {
-            "id": "854cef69-976d-4c2a-a18c-2aa45046c390",
-            "description": "Если планируете решать задачи в тренажёре, берите два.",
-            "image": "/5_Dots.svg",
-            "title": "+1 час в сутках",
-            "category": "софт-скил",
-            "price": 750
-        },
-        {
-            "id": "c101ab44-ed99-4a54-990d-47aa2bb4e7d9",
-            "description": "Лизните этот леденец, чтобы мгновенно запоминать и узнавать любой цветовой код CSS.",
-            "image": "/Shell.svg",
-            "title": "HEX-леденец",
-            "category": "другое",
-            "price": 1450
-        },
-        {
-            "id": "b06cde61-912f-4663-9751-09956c0eed67",
-            "description": "Будет стоять над душой и не давать прокрастинировать.",
-            "image": "/Asterisk_2.svg",
-            "title": "Мамка-таймер",
-            "category": "софт-скил",
-            "price": null
-        },
-        {
-            "id": "412bcf81-7e75-4e70-bdb9-d3c73c9803b7",
-            "description": "Откройте эти куки, чтобы узнать, какой фреймворк вы должны изучить дальше.",
-            "image": "/Soft_Flower.svg",
-            "title": "Фреймворк куки судьбы",
-            "category": "дополнительное",
-            "price": 2500
-        },
-        {
-            "id": "1c521d84-c48d-48fa-8cfb-9d911fa515fd",
-            "description": "Если орёт кот, нажмите кнопку.",
-            "image": "/mute-cat.svg",
-            "title": "Кнопка «Замьютить кота»",
-            "category": "кнопка",
-            "price": 2000
-        },
-        {
-            "id": "f3867296-45c7-4603-bd34-29cea3a061d5",
-            "description": "Чтобы научиться правильно называть модификаторы, без этого не обойтись.",
-            "image": "Pill.svg",
-            "title": "БЭМ-пилюлька",
-            "category": "другое",
-            "price": 1500
-        },
-        {
-            "id": "54df7dcb-1213-4b3c-ab61-92ed5f845535",
-            "description": "Измените локацию для поиска работы.",
-            "image": "/Polygon.svg",
-            "title": "Портативный телепорт",
-            "category": "другое",
-            "price": 100000
-        },
-        {
-            "id": "6a834fb8-350a-440c-ab55-d0e9b959b6e3",
-            "description": "Даст время для изучения React, ООП и бэкенда",
-            "image": "/Butterfly.svg",
-            "title": "Микровселенная в кармане",
-            "category": "другое",
-            "price": 750
-        },
-        {
-            "id": "48e86fc0-ca99-4e13-b164-b98d65928b53",
-            "description": "Очень полезный навык для фронтендера. Без шуток.",
-            "image": "Leaf.svg",
-            "title": "UI/UX-карандаш",
-            "category": "хард-скил",
-            "price": 10000
-        },
-        {
-            "id": "90973ae5-285c-4b6f-a6d0-65d1d760b102",
-            "description": "Сжимайте мячик, чтобы снизить стресс от тем по бэкенду.",
-            "image": "/Mithosis.svg",
-            "title": "Бэкенд-антистресс",
-            "category": "другое",
-            "price": 1000
-        }
-    ]
+// контейнер для теста отображения карточек
+const testSection: HTMLElement = document.querySelector('.gallery');
 
+// экземпляры карточек из темплейтов
+const cardPreview = new Card(cloneTemplate(cardPreviewTemplate), events);
+const cardCatalog = new Card(cloneTemplate(cardCatalogTemplate), events);
+const cardBasket = new Card(cloneTemplate(cardBasketTemplate), events);
 
+// testSection.append(cardCatalog.render(testCards[3]));
 
+// cardCatalog.render({title: 'вар',  price: 1124235234});
 
-    // Выбор карточки как элемент превью
+// const cardCatalog2 = new Card(cloneTemplate(cardCatalogTemplate), events);
+// const cardCatalog3 = new Card(cloneTemplate(cardCatalogTemplate), events);
+// const cardArray = [];
+
+// cardArray.push(cardCatalog.render(testCards[0]));
+// cardArray.push(cardCatalog2.render(testCards[1]));
+// cardArray.push(cardCatalog3.render(testCards[2]));
+
+// cardsConteiner.render({gallery:cardArray})
+
+// слушатель события cards:changed? при срабатывании отрисовывает карточки в каталоге
+events.on('cards:changed', () => {
+	const cardsArray = cardsData.cards.map((card) => {
+		const cardConteiner = new Card(cloneTemplate(cardCatalogTemplate), events);
+		return cardConteiner.render(card);
+	});
+	cardsConteiner.render({gallery: cardsArray});
+});
+
+// Выбор карточки как превью
 events.on('card:selected', (item: ICard) => {
 	cardsData.setPreview(item);
 });
+
+// Выбор карточки как элемент превью
+// events.on('card:selected', (item: ICard) => {
+// 	cardsData.setPreview(item);
+// });

@@ -1,17 +1,18 @@
+// метод для перевода названия в camelCase в kebab-case (для атрибутов)
 export function pascalToKebab(value: string): string {
     return value.replace(/([a-z0–9])([A-Z])/g, "$1-$2").toLowerCase();
 }
-
+// метод для проверки на селектор который содержит больше одного символа
 export function isSelector(x: any): x is string {
     return (typeof x === "string") && x.length > 1;
 }
-
+// метод для проверки на пустоту который
 export function isEmpty(value: any): boolean {
     return value === null || value === undefined;
 }
 
 export type SelectorCollection<T> = string | NodeListOf<Element> | T[];
-
+// метод для получения элементов
 export function ensureAllElements<T extends HTMLElement>(selectorElement: SelectorCollection<T>, context: HTMLElement = document as unknown as HTMLElement): T[] {
     if (isSelector(selectorElement)) {
         return Array.from(context.querySelectorAll(selectorElement)) as T[];
@@ -26,7 +27,7 @@ export function ensureAllElements<T extends HTMLElement>(selectorElement: Select
 }
 
 export type SelectorElement<T> = T | string;
-
+// метод для получения элемента
 export function ensureElement<T extends HTMLElement>(selectorElement: SelectorElement<T>, context?: HTMLElement): T {
     if (isSelector(selectorElement)) {
         const elements = ensureAllElements<T>(selectorElement, context);
@@ -43,12 +44,12 @@ export function ensureElement<T extends HTMLElement>(selectorElement: SelectorEl
     }
     throw new Error('Unknown selector element');
 }
-
+// метод для копирования шаблона
 export function cloneTemplate<T extends HTMLElement>(query: string | HTMLTemplateElement): T {
     const template = ensureElement(query) as HTMLTemplateElement;
     return template.content.firstElementChild.cloneNode(true) as T;
 }
-
+// метод для бейминга
 export function bem(block: string, element?: string, modifier?: string): { name: string, class: string } {
     let name = block;
     if (element) name += `__${element}`;
@@ -58,7 +59,7 @@ export function bem(block: string, element?: string, modifier?: string): { name:
         class: `.${name}`
     };
 }
-
+// метод для получения свойств
 export function getObjectProperties(obj: object, filter?: (name: string, prop: PropertyDescriptor) => boolean): string[] {
     return Object.entries(
         Object.getOwnPropertyDescriptors(
@@ -97,7 +98,7 @@ export function isPlainObject(obj: unknown): obj is object {
     return  prototype === Object.getPrototypeOf({}) ||
         prototype === null;
 }
-
+// метод для проверки на boolean
 export function isBoolean(v: unknown): v is boolean {
     return typeof v === 'boolean';
 }
