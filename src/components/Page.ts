@@ -3,22 +3,6 @@ import { ensureElement } from '../utils/utils';
 import { Component } from './base/Component';
 import { IEvents } from './base/Events';
 
-// export interface ICardsConteiner {
-//     gallery: HTMLElement[];
-// }
-// export class CardsConteiner extends Component<ICardsConteiner> {
-//     protected _gallery: HTMLElement;
-//     protected container: HTMLElement;
-
-//     constructor (container: HTMLElement, protected events?: IEvents) {
-//         super(container);
-//         this.container = container;
-//     }
-//     set gallery(items: HTMLElement[]) {
-//         this.container.replaceChildren(...items);
-//     }
-// }
-
 export class Page extends Component<IPage> {
 	protected _counter: HTMLElement;
 	protected _gallery: HTMLElement;

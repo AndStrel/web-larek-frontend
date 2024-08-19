@@ -1,21 +1,19 @@
 import { ICard } from '../types/index';
+import { categories } from '../utils/constants';
 import { cloneTemplate, ensureElement } from '../utils/utils';
 import { Component } from './base/Component';
 import { IEvents } from './base/Events';
 
-// interface ICardActions {
-//     onClick: (event: MouseEvent) => void;
-// }
-
 export class Card extends Component<ICard> {
 	protected _id: string;
-	protected _description?: HTMLElement;
+	protected _description: HTMLElement;
 	protected _image: HTMLImageElement;
 	protected _title: HTMLElement;
 	protected _category: HTMLSpanElement;
 	protected _price: HTMLSpanElement;
 	protected _buttonCard: HTMLButtonElement;
-	// protected _cardGallery: HTMLElement;
+	protected _buttonDelete: HTMLButtonElement;
+	protected _index: HTMLElement;
 
 	constructor(container: HTMLElement, protected events: IEvents) {
 		super(container);
@@ -26,20 +24,22 @@ export class Card extends Component<ICard> {
 		this._category = container.querySelector(`.card__category`);
 		this._price = container.querySelector(`.card__price`);
 		this._buttonCard = container.querySelector(`.card__button-buy`);
-		// this._cardGallery = container.querySelector(`.gallery__item`);
-
-		// устанавливаем слушатель на кнопку купить и при нажатии вызываем событие card:buy
-		// иначе устанавливаем слушатель на карточку и при нажатии вызываем событие card:selected
+		this._buttonDelete = container.querySelector(`.basket__item-delete`);
+		this._index = this.container.querySelector(`.basket__item-index`);
+		// устанавливаем слушатель на кнопку купить и на кнопку удалить
+		// иначе устанавливаем слушатель на карточку
 		if (this._buttonCard) {
-			if (this._buttonCard) {
-				this._buttonCard.addEventListener('click', () => {
-					this.events.emit('card:buy', { card: this });
-				});
-			} else {
-				container.addEventListener('click', () => {
-					this.events.emit('card:selected', { card: this });
-				});
-			}
+			this._buttonCard.addEventListener('click', () => {
+				this.events.emit('card:buy', this);
+			});
+		} else if (this._buttonDelete) {
+			this._buttonDelete.addEventListener('click', () => {
+				this.events.emit('card:delete', this);
+			});
+		} else {
+			this.container.addEventListener('click', () => {
+				this.events.emit('card:selected', this);
+			});
 		}
 	}
 
@@ -47,28 +47,32 @@ export class Card extends Component<ICard> {
 		this._id = value;
 	}
 	get id(): string {
-		return this._id;
+		return this._id || '';
 	}
 	set title(value: string) {
 		this.setText(this._title, value);
 	}
 	get title(): string {
-		return this._title.textContent;
+		return this._title.textContent || '';
 	}
 	set description(value: string) {
 		this.setText(this._description, value);
 	}
 	get description(): string {
-		return this._description.textContent;
+		return this._description.textContent || '';
 	}
 	set image(value: string) {
 		this.setImage(this._image, value, this._title.textContent);
 	}
+	get image(): string {
+		return this._image.src || '';
+	}
 	set category(value: string) {
 		this.setText(this._category, value);
+		this.toggleClass(this._category, categories.get(value), true);
 	}
 	get category(): string {
-		return this._category.textContent;
+		return this._category.textContent || '';
 	}
 
 	set price(value: number) {
@@ -76,7 +80,7 @@ export class Card extends Component<ICard> {
 			this._price.textContent = 'Бесценно';
 			this.setDisabled(this._buttonCard, true);
 		} else if (value === 0) {
-			this._price.textContent = 'Тебе не продается';
+			this._price.textContent = 'Товара нет в наличии';
 			this.setDisabled(this._buttonCard, true);
 		} else {
 			this._price.textContent = String(`${value} синапсов`);
@@ -84,6 +88,26 @@ export class Card extends Component<ICard> {
 		}
 	}
 	get price(): number {
-		return Number(this._price.textContent);
+		if (this._price.textContent === 'Бесценно') {
+			return null;
+		}
+		return parseInt(this._price.textContent);
 	}
+
+	set buttonCard(value: string) {
+		this.setText(this._buttonCard, value);
+	}
+
+	get buttonCard(): string {
+		return this._buttonCard.textContent;
+	}
+
+	set index(value: number) {
+		this.setText(this._index, String(value));
+	}
+
+	get index(): number {
+		return parseInt(this._index.textContent);
+	}
+
 }

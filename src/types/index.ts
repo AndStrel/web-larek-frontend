@@ -1,4 +1,9 @@
-
+export interface ILarekApi {
+    baseUrl: string;
+    cdnUrl: string;
+    get<T>(uri: string): Promise<T>;
+    post<T>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
+}
 
 export interface ICard {
     id: string;
@@ -7,17 +12,9 @@ export interface ICard {
     title: string;
     category: string;
     price: number | null;
-    
 }
 
-export interface IUserData {
-    payment: string;
-    address: string;
-    email: string;
-    phone: string;
-    total: number;
-    items: string[];
-}
+
 
 export interface ICardsData {
     cards: ICard[];
@@ -30,7 +27,6 @@ export interface ICardsData {
 }
 
 export interface IBasketData {
-    cardsBasket: ICard[] | null;
     totalPrice: number;
     counter: number;
     addCard(item: ICard): void;
@@ -41,35 +37,45 @@ export interface IBasketData {
     get BasketTotalPrice(): number;
 }
 
+export interface IUserData {
+    payment: methodPay;
+    address: string;
+    email: string;
+    phone: string;
+    total: number;
+    items: string[];
+    
+}
+
 export interface IPage {
 	counter: number;
 	gallery: HTMLElement[];
 	locked: boolean;
 }
 
+export interface IBasket {
+    cardsList: HTMLElement[];
+    cardsBasketList: HTMLElement[];
+    locked: boolean;
+}
+
+export interface IForm {
+    button: HTMLButtonElement;
+    valid: boolean;
+	errors: HTMLElement;
+    reset(): void;
+    validate(): boolean;
+}
+
 export  interface ISuccess {
     totalPrice: number;
 }
-export interface IForm {
-    button: string;
-    form: HTMLFormElement;
-    inputs: HTMLInputElement[];
-    errors: string[];
-    reset(): void;
-    validate(): boolean;
-    submit(): void;
-}
+
 
 export type TCardCatalog = Pick<ICard, "id" |  "image" | "title" | "category" | "price">;
 export type TCardBasket = Pick<ICard, "title" | "price">;
 export type TUserDataOneStep = Pick<IUserData, "payment" | "address">;
 export type TUserDataTwoStep = Pick<IUserData, "email" | "phone">;
-export type methodPay = "online" | "cash";
+export type methodPay = "online" | "cash" | "";
 export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
-export interface ILarekApi {
-    baseUrl: string;
-    cdnUrl: string;
-    get<T>(uri: string): Promise<T>;
-    post<T>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
-}
