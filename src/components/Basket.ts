@@ -2,7 +2,7 @@ import { IBasket, IBasketData, ICard } from '../types';
 import { Component } from './base/Component';
 import { IEvents } from './base/Events';
 import { Card } from './Card';
-import { UserData } from './UserData';
+import { OrderData } from './OrderData';
 
 export class Basket extends Component<IBasket> {
 	protected _cardsBasketList: HTMLElement;
@@ -103,10 +103,10 @@ export class Basket extends Component<IBasket> {
 		this.events.emit('basket:changed');
 	}
 
-	addCardsToOrder<T extends UserData> (arr: T) {
+	addCardsToOrder<T extends OrderData> (arr: T) {
 		this.cardsBasket.forEach((item) => {
-			if (!arr.items.includes(item.id)) {
-				arr.items.push(item.id);
+			if (!arr.getItems().includes(item.id)) {
+				arr.setItems(item.id);
 			}
 		});
 	}

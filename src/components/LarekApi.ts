@@ -1,4 +1,4 @@
-import { ICard, ILarekApi, IUserData } from '../types';
+import { ICard, ILarekApi, IOrder, IOrderData } from '../types';
 import { CDN_URL } from '../utils/constants';
 import { Api, ApiListResponse } from './base/Api';
 
@@ -36,9 +36,9 @@ export class LarekApi extends Api implements ILarekApi {
 		);
 	}
 	// отправка данных о заказе вводимых пользователем
-	postUserData(order: IUserData): Promise<IUserData> {
-		return this.post<IUserData>('/order', order).then(
-			(data: IUserData) => data
+	postOrderData(order: IOrder): Promise<IOrder> {
+		return this.post<IOrder>('/order', order).then(
+			(data: IOrder) => data
 		);
 	}
 }

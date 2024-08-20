@@ -1,4 +1,4 @@
-import { ApiPostMethods, ILarekApi } from "../../types/index";
+import { TApiPostMethods, ILarekApi } from "../../types/index";
 
 export type ApiListResponse<Type> = {
     total: number,
@@ -34,7 +34,7 @@ export class Api implements ILarekApi{
         }).then(this.handleResponse<T>);
     }
 
-    post<T>(uri: string, data: object, method: ApiPostMethods = 'POST') {
+    post<T>(uri: string, data: object, method: TApiPostMethods = 'POST') {
         return fetch(this.baseUrl + uri, {
             ...this.options,
             method,
