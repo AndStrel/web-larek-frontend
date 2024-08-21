@@ -1,41 +1,28 @@
+import './scss/styles.scss';
 import { EventEmitter } from './components/base/Events';
 import { CardsData } from './components/CardsData';
 import { Basket } from './components/Basket';
 import { OrderData } from './components/OrderData';
-import './scss/styles.scss';
-import {
-	ICard,
-
-
-	IOrder,
-
-
-	TOrderField,
-} from './types';
+import { ICard, IOrder, TOrderField } from './types';
 import { LarekApi } from './components/LarekApi';
-import { API_URL, CDN_URL} from './utils/constants';
-
+import { API_URL, CDN_URL } from './utils/constants';
 import { Card } from './components/Card';
 import { cloneTemplate, ensureElement } from './utils/utils';
-
 import { Page } from './components/Page';
 import { Modal } from './components/common/Modal';
 import { Order, OrderContact } from './components/Order';
 import { Success } from './components/common/Success';
+import { BasketData } from './components/BasketData';
 
 const events = new EventEmitter();
 const larekApi = new LarekApi(API_URL, CDN_URL);
 const cardsData = new CardsData(events);
+const basketData = new BasketData(events);
 const orderData = new OrderData(events);
-const page = new Page(document.querySelector('.gallery'), events);
+const page = new Page(ensureElement<HTMLElement>('.gallery'), events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
-// слушатель всех событий выводящий в консоль название события и его данные
-events.onAll((event) => {
-	console.log(event.eventName, event.data);
-});
-
-// переменные контейнеров для шаблонов
+// шаблоны для контейнеров
 const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
 const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
 const cardBasketTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
@@ -56,7 +43,8 @@ larekApi
 		cardsData.setCards(items);
 	})
 	.catch((error) => {
-		console.log(error);
+		console.log(`${error}.
+		Не ну тут надо разбираться.`);
 	});
 
 // создает карточки из темплейтов и добавляет их в галерею на главной странице
@@ -76,7 +64,7 @@ events.on('card:selected', (item: ICard) => {
 // Открытие превью карточки
 events.on('preview:changed', (item: ICard) => {
 	const card = new Card(cloneTemplate(cardPreviewTemplate), events);
-	if (basket.cardsBasket.find((card) => card.id === item.id)) {
+	if (basketData.cardsBasket.find((card) => card.id === item.id)) {
 		card.buttonCard = 'Убрать из корзины';
 	}
 	modal.render({
@@ -91,36 +79,40 @@ events.on('preview:changed', (item: ICard) => {
 	});
 });
 
-// Открытие корзины
-events.on('basket:open', () => {
-	modal.render({ content: basket.render() });
-	basket.BasketCounter === 0 ? basket.clearBasket() : null;
-});
-
-// // Отправка карточки в корзину
+// Отправка карточки в корзину
 events.on('card:buy', (item: Card) => {
-	basket.toggleBasketCard(item);
+	basketData.toggleBasketCard(item);
+	basket.fullCardBasket(basketData.sumPrice);
 });
 
 // Удаление карточки из корзины
 events.on('card:delete', (item: ICard) => {
-	basket.deleteCard(item);
+	basketData.deleteCard(item);
+	basketData.BasketCounter === 0 ? basket.clearBasket() : null;
+});
+
+// Открытие корзины
+events.on('basket:open', () => {
+	modal.render({ content: basket.render() });
+
+	basketData.BasketCounter === 0 ? basket.clearBasket() : null;
 });
 
 // Измененние данных в корзине
 events.on('basket:changed', () => {
-	page.counter = basket.BasketCounter;
-	basket.cardsBasket.map(() => {
-		const cardsArray = basket.cardsBasket.map((item) => {
+	page.counter = basketData.BasketCounter;
+	basket.setSumPriceConteiner(basketData.sumPrice);
+	basketData.cardsBasket.map(() => {
+		const cardsArray = basketData.cardsBasket.map((item) => {
 			const newBasketCard = new Card(cloneTemplate(cardBasketTemplate), events);
-			newBasketCard.index = basket.getCardIndex(item);
+			newBasketCard.index = basketData.getCardIndex(item);
 			return newBasketCard.render({
 				title: item.title,
 				price: item.price,
 				id: item.id,
 			});
 		});
-		basket.render({ cardsBasketList: cardsArray });
+		basket.render({ basketList: cardsArray });
 	});
 });
 
@@ -133,8 +125,8 @@ events.on('order:open', () => {
 			errors: [],
 		}),
 	});
-	basket.addCardsToOrder(orderData);
-	orderData.setTotal(Number(basket.BasketTotalPrice));
+	basketData.addCardsToOrder(orderData.getOrder());
+	orderData.setTotal(Number(basketData.sumPrice));
 	order.enablePaymentFocus(orderData.getPayment());
 });
 
@@ -152,10 +144,21 @@ events.on(
 	/\.*\..*:change/,
 	(data: { field: keyof TOrderField; value: string }) => {
 		orderData.setOrderField(data.field, data.value);
-		console.log(orderData);
 	}
 );
 
+// при получении данных валидации отрисовывает ошибки
+events.on('formErrors:change', (errors: Partial<IOrder>) => {
+	const { email, phone, address, payment } = errors;
+	order.valid = !payment && !address;
+	order.errors = Object.values({ payment, address })
+		.filter((i) => !!i)
+		.join('; ');
+	contacts.valid = !email && !phone;
+	contacts.errors = Object.values({ email, phone })
+		.filter((i) => !!i)
+		.join('; ');
+});
 // при нажатии на кнопку Оформить заказ открывает форму для ввода контактных данных
 events.on('order:submit', () => {
 	modal.render({
@@ -168,34 +171,21 @@ events.on('order:submit', () => {
 	});
 });
 
-// при получении данных валидации отрисовывает ошибки
-events.on('formErrors:change', (errors: Partial<IOrder>) => {
-	const { email, phone, address, payment } = errors;
-	console.log(order.valid);
-	order.valid = !payment && !address;
-	order.errors = Object.values({ payment, address })
-		.filter((i) => !!i)
-		.join('; ');
-	contacts.valid = !email && !phone;
-	contacts.errors = Object.values({ email, phone })
-		.filter((i) => !!i)
-		.join('; ');
-});
-
 // при нажатии на кнопку "Оформить заказ" отправляет данные на сервер и после получения ответа отрисовывает сообщение об успешной отправке и очищает корзину
 events.on('contacts:submit', () => {
-	basket.clearBasket();
 	larekApi
 		.postOrderData(orderData.getOrder())
 		.then((data) => {
 			success.setTotal(Number(data.total));
-
 			modal.render({
 				content: success.render(),
 			});
+			basketData.clearBasket();
+			basket.clearBasket();
+			orderData.clearOrder();
 		})
 		.catch((err) => {
-			console.error(`Ошибка при заказе ${err}.
+			console.error(`${err}.
 		Попробуйте ещё раз или обратитесь в поддержку.`);
 		});
 });
@@ -207,13 +197,12 @@ events.on('success:finished', () => {
 
 // Блокируем прокрутку страницы если открыта модалка
 events.on('modal:open', () => {
-	page.locked = true;
+	page.wrapper = true;
 });
 
 // ... и разблокируем
 events.on('modal:close', () => {
-	page.locked = false;
+	page.wrapper = false;
 	order.clearInputs();
 	contacts.clearInputs();
-	// orderData.payment = ''; // Возможно не нужно
 });

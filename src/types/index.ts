@@ -1,8 +1,9 @@
 export interface ILarekApi {
 	baseUrl: string;
 	cdnUrl: string;
-	get<T>(uri: string): Promise<T>;
-	post<T>(uri: string, data: object, method?: TApiPostMethods): Promise<T>;
+	getCard(id: string): Promise<ICard>;
+	getCards(): Promise<ICard[]>;
+	postOrderData(order: IOrder): Promise<IOrder>;
 }
 
 export interface ICard {
@@ -19,41 +20,56 @@ export interface ICardsData {
 	preview: string | null;
 	setCards(cards: ICard[]): void;
 	setPreview(item: ICard): void;
-	getCards(): ICard[];
+	getCardById(id: string): ICard;
 }
 
 export interface IBasketData {
-	totalPrice: number;
 	counter: number;
+	sumPrice: number;
+	cardsBasket: ICard[];
 	addCard(item: ICard): void;
 	deleteCard(item: ICard): void;
-	getCardIndex(item: ICard): number;
+	toggleBasketCard(item: ICard): number;
+	getCardIndex(): void;
 	clearBasket(): void;
-	get BasketCounter(): number;
-	get BasketTotalPrice(): number;
+	addCardsToOrder(): void;
 }
 
 export interface IOrderData {
 	order: {};
-	errors: FormErrors;
+	errors: {};
+	setItems(id: string): void;
+	setTotal(value: number): void;
+	setPayment(value: TmethodPay): void;
+	getPayment(): TmethodPay;
+	setOrderField(field: keyof TOrderField, value: string): void;
+	validateOrder(): void;
+	getOrder(): IOrder;
+	clearOrder(): void;
 }
 
 export interface IPage {
 	counter: number;
 	gallery: HTMLElement[];
-	locked: boolean;
+	wrapper: HTMLElement;
+	basket: HTMLElement;
 }
 
 export interface IBasket {
-	cardsList: HTMLElement[];
-	cardsBasketList: HTMLElement[];
-	locked: boolean;
+	basketList: HTMLElement[];
+	sumPriceConteiner: HTMLElement;
+	basketButton: HTMLButtonElement;
+	fullCardBasket(num: number): void;
+	setSumPriceConteiner(num: number): void;
+	clearBasket(): void;
 }
 
 export interface IForm {
 	valid: boolean;
 	errors: string[];
-	}
+	clearInputs(): void;
+	render(): HTMLElement;
+}
 
 export interface IOrder {
 	payment: string;
@@ -65,14 +81,9 @@ export interface IOrder {
 }
 export interface ISuccess {
 	total: number;
-	clearForm(): void;
+	setTotal(): void;
 }
 
-export type TCardCatalog = Pick<
-	ICard,
-	'id' | 'image' | 'title' | 'category' | 'price'
->;
-export type TCardBasket = Pick<ICard, 'title' | 'price'>;
 export type TOrderDataOneStep = Pick<IOrder, 'payment' | 'address'>;
 export type TOrderDataTwoStep = Pick<IOrder, 'email' | 'phone'>;
 export type TOrderField = TOrderDataOneStep & TOrderDataTwoStep;

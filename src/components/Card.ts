@@ -1,6 +1,5 @@
 import { ICard } from '../types/index';
 import { categories } from '../utils/constants';
-import { cloneTemplate, ensureElement } from '../utils/utils';
 import { Component } from './base/Component';
 import { IEvents } from './base/Events';
 
@@ -26,8 +25,7 @@ export class Card extends Component<ICard> {
 		this._buttonCard = container.querySelector(`.card__button-buy`);
 		this._buttonDelete = container.querySelector(`.basket__item-delete`);
 		this._index = this.container.querySelector(`.basket__item-index`);
-		// устанавливаем слушатель на кнопку купить и на кнопку удалить
-		// иначе устанавливаем слушатель на карточку
+
 		if (this._buttonCard) {
 			this._buttonCard.addEventListener('click', () => {
 				this.events.emit('card:buy', this);
@@ -87,6 +85,7 @@ export class Card extends Component<ICard> {
 			this.setDisabled(this._buttonCard, false);
 		}
 	}
+
 	get price(): number {
 		if (this._price.textContent === 'Бесценно') {
 			return null;
@@ -109,5 +108,4 @@ export class Card extends Component<ICard> {
 	get index(): number {
 		return parseInt(this._index.textContent);
 	}
-
 }

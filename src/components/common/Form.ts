@@ -43,7 +43,7 @@ export class Form<T> extends Component<IForm> {
 			value,
 		});
 	}
-
+	// очищает поля ввода
 	clearInputs() {
 		this._inputs.forEach((input) => {
 			input.value = '';
@@ -58,7 +58,7 @@ export class Form<T> extends Component<IForm> {
 		this.setText(this._errors, value);
 	}
 	// отрисовывает форму с учетом состояния валидации
-	render(state: Partial<T> & IForm) {
+	render(state: Partial<T> & Partial<IForm>) {
 		const { valid, errors, ...inputs } = state;
 		super.render({ valid, errors });
 		Object.assign(this, inputs);

@@ -21,16 +21,16 @@ export class Page extends Component<IPage> {
 			this.events.emit('basket:open');
 		});
 	}
-
+	// Метод для изменения счетчика корзины на главной странице
 	set counter(value: number) {
 		this.setText(this._counter, String(value));
 	}
-
+	// Метод для отрисовки галлереи на главной странице
 	set gallery(items: HTMLElement[]) {
 		this._gallery.replaceChildren(...items);
 	}
-
-	set locked(value: boolean) {
+	//Метод для установки блокировки страницы
+	set wrapper(value: boolean) {
 		if (value) {
 			this._wrapper.classList.add('page__wrapper_locked');
 		} else {
@@ -38,5 +38,3 @@ export class Page extends Component<IPage> {
 		}
 	}
 }
-
-

@@ -1,10 +1,4 @@
-import {
-	IForm,
-	TmethodPay,
-	TOrderDataOneStep,
-	TOrderDataTwoStep,
-} from '../types';
-import { Component } from './base/Component';
+import { TOrderDataOneStep, TOrderDataTwoStep } from '../types';
 import { IEvents } from './base/Events';
 import { Form } from './common/Form';
 import { OrderData } from './OrderData';

@@ -19,16 +19,12 @@ export class Success extends Component<ISuccess> {
 		);
 
 		this.bayButton.addEventListener('click', () => {
-				this.events.emit('success:finished');
+			this.events.emit('success:finished');
 		});
 	}
+	// установка общего количества синапсов
 	setTotal(value: number) {
 		this.total = value;
 		this.description.textContent = `Списано ${this.total} синапсов`;
 	}
-
-//    close() {
-//         this.container.classList.remove('order-success_active');
-//         this.events.emit('success:close');
-//     }
 }

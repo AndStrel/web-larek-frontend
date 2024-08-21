@@ -1,9 +1,4 @@
-import {
-	FormErrors,
-	IOrder,
-	TmethodPay,
-	TOrderField,
-} from '../types';
+import { FormErrors, IOrder, TmethodPay, TOrderField } from '../types';
 import { IEvents } from './base/Events';
 
 export class OrderData {
@@ -20,32 +15,31 @@ export class OrderData {
 	constructor(protected events: IEvents) {
 		this.events = events;
 	}
-
+	// записывает в массив карточек id выбранных карточек
 	setItems(id: string) {
 		this.order.items.push(id);
 	}
-	getItems(): string[] {
-		return this.order.items;
-	}
 
+	// устанавливает сумму заказа
 	setTotal(value: number) {
 		this.order.total = value;
 	}
-	getTotal(): number {
-		return this.order.total;
-	}
+
+	// устанавливает способ оплаты
 	setPayment(value: TmethodPay) {
 		this.order.payment = value;
 	}
+
+	// возвращает способ оплаты
 	getPayment() {
 		return this.order.payment;
 	}
-
+	//передает название поля и значение которое ввел пользователь
 	setOrderField(field: keyof TOrderField, value: string) {
 		this.order[field] = value;
 		this.validateOrder();
 	}
-
+	// валидирует форму
 	validateOrder() {
 		const errors: typeof this.errors = {};
 		if (!this.order.email) {
@@ -64,11 +58,11 @@ export class OrderData {
 		this.events.emit('formErrors:change', this.errors);
 		return Object.keys(errors).length === 0;
 	}
-
-    getOrder() {
-        return this.order;
-    }
-
+	// возвращает данные заказа
+	getOrder() {
+		return this.order;
+	}
+	// очищает данные заказа
 	clearOrder() {
 		this.order = {
 			payment: '',
