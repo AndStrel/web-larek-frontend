@@ -1,4 +1,4 @@
-import { IBasket } from '../types';
+import { IBasket, EventsEnum } from '../types';
 import { Component } from './base/Component';
 import { IEvents } from './base/Events';
 
@@ -15,7 +15,7 @@ export class Basket extends Component<IBasket> {
 		this._sumPriceConteiner = this.container.querySelector('.basket__price');
 
 		this._basketButton.addEventListener('click', () => {
-			this.events.emit('order:open');
+			this.events.emit(EventsEnum.ORDER_OPEN);
 		});
 	}
 	// метод для отрисовки карт в корзине
@@ -26,21 +26,21 @@ export class Basket extends Component<IBasket> {
 	// Метод для отображения корзины при наличии карт
 	fullCardBasket(num: number) {
 		this.setSumPriceConteiner(num);
-		this._basketButton.disabled = false;
-		this._basketButton.textContent = 'Оформить заказ';
+		this.setDisabled (this._basketButton, false); 
+		this.setText (this._basketButton, 'Оформить заказ'); 
 	}
 
 	// Метод для изменения суммы в корзине
 	setSumPriceConteiner(num: number) {
-		this._sumPriceConteiner.textContent = String(`${num} синапсов`);
+		this.setText (this._sumPriceConteiner, String(`${num} синапсов`));
 	}
 
 	// Метод для очистки корзины
 	clearBasket() {
-		this._sumPriceConteiner.textContent = '0 синапсов';
+		this.setText (this._sumPriceConteiner, '0 синапсов');
 		this._basketList.innerHTML = '';
-		this._basketButton.disabled = true;
-		this._basketButton.textContent = 'Корзина пуста';
-		this.events.emit('basket:changed');
+		this.setDisabled (this._basketButton, true);
+		this.setText (this._basketButton, 'Корзина пуста');
+		this.events.emit(EventsEnum.BASKET_CHANGED);
 	}
 }

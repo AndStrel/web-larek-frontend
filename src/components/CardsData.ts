@@ -1,4 +1,4 @@
-import { ICard, ICardsData } from "../types";
+import { EventsEnum, ICard, ICardsData } from "../types";
 import { IEvents } from "./base/Events";
 
 export class CardsData implements ICardsData {
@@ -14,13 +14,13 @@ export class CardsData implements ICardsData {
 // Метод для установки коллекции карточек
     setCards(cards: ICard[]) {
         this.cards = cards;
-        this.events.emit('cards:changed');
+        this.events.emit(EventsEnum.CARDS_CHANGE);
     }
 
 // Метод для установки карточки в превью 
     setPreview(item: ICard) {
         this.preview = item.id;
-        this.events.emit('preview:changed', item);
+        this.events.emit(EventsEnum.PREVIEW_CHANGE, item);
     }
 
 // Метод для получения карточки по id

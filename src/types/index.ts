@@ -72,7 +72,7 @@ export interface IForm {
 }
 
 export interface IOrder {
-	payment: string;
+	payment: TmethodPay;
 	address: string;
 	email: string;
 	phone: string;
@@ -90,3 +90,24 @@ export type TOrderField = TOrderDataOneStep & TOrderDataTwoStep;
 export type TmethodPay = 'online' | 'cash' | '';
 export type TApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 export type FormErrors = Partial<Record<keyof IOrder, string>>;
+
+export enum EventsEnum {
+	CARDS_CHANGE = 'cards:change',
+	CARDS_SELECT = 'card:selected',
+	PREVIEW_CHANGE = 'preview:changed',
+	CARD_BUY = 'card:buy',
+	CARD_DELETE = 'card:delete',
+	BASKET_OPEN = 'basket:open',
+	BASKET_CLOSE = 'basket:close',
+	BASKET_CHANGED = 'basket:changed',
+	ORDER_OPEN = 'order:open',
+	ORDER_CLOSE = 'order:close',
+	ORDER_CHANGED = 'order:changed',
+	ERRORS_CHANGE = 'formErrors:change',
+	ORDER_SUBMIT = 'order:submit',
+	CONTACTS_SUBMIT = 'contacts:submit',
+	ORDER_SUCCESS = 'success:finished',
+	MODAL_OPEN = 'modal:open',
+	MODAL_CLOSE = 'modal:close',
+}
+

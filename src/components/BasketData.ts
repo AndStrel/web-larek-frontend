@@ -1,4 +1,4 @@
-import { ICard, IOrder } from '../types';
+import { EventsEnum, ICard, IOrder } from '../types';
 import { IEvents } from './base/Events';
 import { Card } from './Card';
 
@@ -15,7 +15,7 @@ export class BasketData {
 	// метод для добавления массива карт в корзину
 	set cardsBasket(items: ICard[]) {
 		this._cardsBasket = items;
-		this.events.emit('basket:changed');
+		this.events.emit(EventsEnum.BASKET_CHANGED);
 	}
 	// метод для получения карт в корзине
 	get cardsBasket(): ICard[] {
@@ -23,11 +23,11 @@ export class BasketData {
 	}
 
 	// Метод для записи значения количества карточек в корзине
-	set BasketCounter(value: number) {
+	set basketCounter(value: number) {
 		this._counter = value;
 	}
 	// Метод для получения значения количества карточек в корзине
-	get BasketCounter(): number {
+	get basketCounter(): number {
 		return this._counter;
 	}
 	// Метод для получения общей стоимости карточек в корзине
@@ -40,7 +40,7 @@ export class BasketData {
 		this._cardsBasket = [...this._cardsBasket, item];
 		this._counter += 1;
 		this._sumPrice += item.price;
-		this.events.emit('basket:changed', this);
+		this.events.emit(EventsEnum.BASKET_CHANGED, this);
 	}
 
 	// Метод для удаления карты из корзины
@@ -51,7 +51,7 @@ export class BasketData {
 		);
 		this._sumPrice > 0 ? (this._sumPrice -= item.price) : null;
 		this._counter > 0 ? (this._counter -= 1) : null;
-		this.events.emit('basket:changed', this);
+		this.events.emit(EventsEnum.BASKET_CHANGED, this);
 	}
 
 	// Метод для переключения состояния кнопки в корзине и добавления/удаления из корзины

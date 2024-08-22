@@ -51,7 +51,7 @@ export class Form<T> extends Component<IForm> {
 	}
 	// меняет кнопку в зависимости от состояния валидации
 	set valid(value: boolean) {
-		this._button.disabled = !value;
+		this.setDisabled(this._button, !value);
 	}
 	//  меняет сообщение об ошибках
 	set errors(value: string) {

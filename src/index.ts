@@ -3,7 +3,7 @@ import { EventEmitter } from './components/base/Events';
 import { CardsData } from './components/CardsData';
 import { Basket } from './components/Basket';
 import { OrderData } from './components/OrderData';
-import { ICard, IOrder, TOrderField } from './types';
+import { ICard, IOrder, TOrderField, EventsEnum, TmethodPay } from './types';
 import { LarekApi } from './components/LarekApi';
 import { API_URL, CDN_URL } from './utils/constants';
 import { Card } from './components/Card';
@@ -43,12 +43,12 @@ larekApi
 		cardsData.setCards(items);
 	})
 	.catch((error) => {
-		console.log(`${error}.
+		console.error(`${error}.
 		Не ну тут надо разбираться.`);
 	});
 
 // создает карточки из темплейтов и добавляет их в галерею на главной странице
-events.on('cards:changed', () => {
+events.on(EventsEnum.CARDS_CHANGE, () => {
 	const cardsArray = cardsData.cards.map((card) => {
 		const cardConteiner = new Card(cloneTemplate(cardCatalogTemplate), events);
 		return cardConteiner.render(card);
@@ -57,12 +57,12 @@ events.on('cards:changed', () => {
 });
 
 // Устанавливает ID карточки в превью модели и вызывает событие preview:changed.
-events.on('card:selected', (item: ICard) => {
+events.on(EventsEnum.CARDS_SELECT, (item: ICard) => {
 	cardsData.setPreview(item);
 });
 
 // Открытие превью карточки
-events.on('preview:changed', (item: ICard) => {
+events.on(EventsEnum.PREVIEW_CHANGE, (item: ICard) => {
 	const card = new Card(cloneTemplate(cardPreviewTemplate), events);
 	if (basketData.cardsBasket.find((card) => card.id === item.id)) {
 		card.buttonCard = 'Убрать из корзины';
@@ -80,27 +80,26 @@ events.on('preview:changed', (item: ICard) => {
 });
 
 // Отправка карточки в корзину
-events.on('card:buy', (item: Card) => {
+events.on(EventsEnum.CARD_BUY, (item: Card) => {
 	basketData.toggleBasketCard(item);
 	basket.fullCardBasket(basketData.sumPrice);
 });
 
 // Удаление карточки из корзины
-events.on('card:delete', (item: ICard) => {
+events.on(EventsEnum.CARD_DELETE, (item: ICard) => {
 	basketData.deleteCard(item);
-	basketData.BasketCounter === 0 ? basket.clearBasket() : null;
+	basketData.basketCounter === 0 ? basket.clearBasket() : null;
 });
 
 // Открытие корзины
-events.on('basket:open', () => {
+events.on(EventsEnum.BASKET_OPEN, () => {
 	modal.render({ content: basket.render() });
-
-	basketData.BasketCounter === 0 ? basket.clearBasket() : null;
+	basketData.basketCounter === 0 ? basket.clearBasket() : null;
 });
 
 // Измененние данных в корзине
-events.on('basket:changed', () => {
-	page.counter = basketData.BasketCounter;
+events.on(EventsEnum.BASKET_CHANGED, () => {
+	page.counter = basketData.basketCounter;
 	basket.setSumPriceConteiner(basketData.sumPrice);
 	basketData.cardsBasket.map(() => {
 		const cardsArray = basketData.cardsBasket.map((item) => {
@@ -117,7 +116,7 @@ events.on('basket:changed', () => {
 });
 
 // оформление заказа
-events.on('order:open', () => {
+events.on(EventsEnum.ORDER_OPEN, () => {
 	modal.render({
 		content: order.render({
 			address: '',
@@ -128,27 +127,36 @@ events.on('order:open', () => {
 	basketData.addCardsToOrder(orderData.getOrder());
 	orderData.setTotal(Number(basketData.sumPrice));
 	order.enablePaymentFocus(orderData.getPayment());
+	orderData.validateOrder();
 });
 
 // при изменении способа оплаты отрисовывает актуальные данные которые записаны в orderData
-events.on('order:changed', (data: { container: Order; payment: string }) => {
-	data.payment === 'online'
-		? orderData.setPayment('online')
-		: orderData.setPayment('cash');
-	data.container.disablePaymentFocus(orderData);
-	orderData.validateOrder();
-});
+events.on(
+	EventsEnum.ORDER_CHANGED,
+	(data: { container: Order; payment: TmethodPay }) => {
+		orderData.togglePayment(data.payment);
+		data.container.enablePaymentFocus(orderData.getPayment());
+		data.container.disablePaymentFocus(orderData);
+		orderData.validateOrder();
+	}
+);
 
 // при изменении полей ввода передает данные в order
 events.on(
 	/\.*\..*:change/,
-	(data: { field: keyof TOrderField; value: string }) => {
+	(data: { field: keyof TOrderField; value: TmethodPay }) => {
 		orderData.setOrderField(data.field, data.value);
+		if (data.field === 'email') {
+			orderData.validateEmail(data.value);
+		}
+		if (data.field === 'phone') {
+			orderData.validatePhone(data.value);
+		}
 	}
 );
 
 // при получении данных валидации отрисовывает ошибки
-events.on('formErrors:change', (errors: Partial<IOrder>) => {
+events.on(EventsEnum.ERRORS_CHANGE, (errors: Partial<IOrder>) => {
 	const { email, phone, address, payment } = errors;
 	order.valid = !payment && !address;
 	order.errors = Object.values({ payment, address })
@@ -160,7 +168,7 @@ events.on('formErrors:change', (errors: Partial<IOrder>) => {
 		.join('; ');
 });
 // при нажатии на кнопку Оформить заказ открывает форму для ввода контактных данных
-events.on('order:submit', () => {
+events.on(EventsEnum.ORDER_SUBMIT, () => {
 	modal.render({
 		content: contacts.render({
 			phone: '',
@@ -172,7 +180,7 @@ events.on('order:submit', () => {
 });
 
 // при нажатии на кнопку "Оформить заказ" отправляет данные на сервер и после получения ответа отрисовывает сообщение об успешной отправке и очищает корзину
-events.on('contacts:submit', () => {
+events.on(EventsEnum.CONTACTS_SUBMIT, () => {
 	larekApi
 		.postOrderData(orderData.getOrder())
 		.then((data) => {
@@ -183,6 +191,8 @@ events.on('contacts:submit', () => {
 			basketData.clearBasket();
 			basket.clearBasket();
 			orderData.clearOrder();
+			order.clearInputs();
+			contacts.clearInputs();
 		})
 		.catch((err) => {
 			console.error(`${err}.
@@ -191,18 +201,16 @@ events.on('contacts:submit', () => {
 });
 
 // обновляем страницу после нажатия кнопки "За новыми покупками!"
-events.on('success:finished', () => {
-	document.location.reload();
+events.on(EventsEnum.ORDER_SUCCESS, () => {
+	modal.close();
 });
 
 // Блокируем прокрутку страницы если открыта модалка
-events.on('modal:open', () => {
+events.on(EventsEnum.MODAL_OPEN, () => {
 	page.wrapper = true;
 });
 
 // ... и разблокируем
-events.on('modal:close', () => {
+events.on(EventsEnum.MODAL_CLOSE, () => {
 	page.wrapper = false;
-	order.clearInputs();
-	contacts.clearInputs();
 });

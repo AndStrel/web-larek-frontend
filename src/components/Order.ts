@@ -1,4 +1,4 @@
-import { TOrderDataOneStep, TOrderDataTwoStep } from '../types';
+import { EventsEnum, TOrderDataOneStep, TOrderDataTwoStep } from '../types';
 import { IEvents } from './base/Events';
 import { Form } from './common/Form';
 import { OrderData } from './OrderData';
@@ -21,8 +21,7 @@ export class Order extends Form<TOrderDataOneStep> {
 
 		if (this._buttonOnline) {
 			this._buttonOnline.addEventListener('click', () => {
-				this.toggleClass(this._buttonOnline, 'button_alt-active');
-				this.events.emit('order:changed', {
+				this.events.emit(EventsEnum.ORDER_CHANGED, {
 					container: this,
 					payment: 'online',
 				});
@@ -30,29 +29,42 @@ export class Order extends Form<TOrderDataOneStep> {
 		}
 		if (this._buttonCash) {
 			this._buttonCash.addEventListener('click', () => {
-				this.toggleClass(this._buttonCash, 'button_alt-active');
-				this.events.emit('order:changed', { container: this, payment: 'cash' });
+				this.events.emit(EventsEnum.ORDER_CHANGED, {
+					container: this,
+					payment: 'cash',
+				});
 			});
 		}
+	}
+
+	// внутренняя функция для переключения активности кнопок
+	toggleCashPayment(state: boolean = true) {
+		this.toggleClass(this._buttonCash, 'button_alt-active', state);
+	}
+	toggleOnlinePayment(state: boolean = true) {
+		this.toggleClass(this._buttonOnline, 'button_alt-active', state);
 	}
 
 	// проверяет способ записанный в данных и при его наличсии выделяет актуальный, при его отсутствии обнуляет выделение
 	enablePaymentFocus(value: string) {
 		if (value === 'cash') {
-			this.toggleClass(this._buttonCash, 'button_alt-active', true);
-			this.toggleClass(this._buttonOnline, 'button_alt-active', false);
+			this.toggleCashPayment();
+			this.toggleOnlinePayment(false);
+		} else if (value === 'online') {
+			this.toggleOnlinePayment();
+			this.toggleCashPayment(false);
 		} else {
-			this._buttonCash.classList.remove('button_alt-active');
-			this._buttonOnline.classList.remove('button_alt-active');
+			this.toggleCashPayment(false);
+			this.toggleOnlinePayment(false);
 		}
 	}
 
 	// при изменении способа оплаты снимает выделение с ранее выбранного способа
 	disablePaymentFocus(item: OrderData) {
 		if (item.getPayment().includes('cash')) {
-			this._buttonOnline.classList.remove('button_alt-active');
+			this.toggleOnlinePayment(false);
 		} else {
-			this._buttonCash.classList.remove('button_alt-active');
+			this.toggleCashPayment(false);
 		}
 	}
 }

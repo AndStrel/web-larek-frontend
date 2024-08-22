@@ -1,4 +1,4 @@
-import { ICard } from '../types/index';
+import { EventsEnum, ICard } from '../types/index';
 import { categories } from '../utils/constants';
 import { Component } from './base/Component';
 import { IEvents } from './base/Events';
@@ -28,15 +28,15 @@ export class Card extends Component<ICard> {
 
 		if (this._buttonCard) {
 			this._buttonCard.addEventListener('click', () => {
-				this.events.emit('card:buy', this);
+				this.events.emit(EventsEnum.CARD_BUY, this);
 			});
 		} else if (this._buttonDelete) {
 			this._buttonDelete.addEventListener('click', () => {
-				this.events.emit('card:delete', this);
+				this.events.emit(EventsEnum.CARD_DELETE, this);
 			});
 		} else {
 			this.container.addEventListener('click', () => {
-				this.events.emit('card:selected', this);
+				this.events.emit(EventsEnum.CARDS_SELECT, this);
 			});
 		}
 	}
@@ -75,16 +75,18 @@ export class Card extends Component<ICard> {
 
 	set price(value: number) {
 		if (value === null) {
-			this._price.textContent = 'Бесценно';
-			this.setDisabled(this._buttonCard, true);
+			this.setText (this._price, 'Бесценно');
+			this.toggleButton();
 		} else if (value === 0) {
-			this._price.textContent = 'Товара нет в наличии';
-			this.setDisabled(this._buttonCard, true);
+			this.setText (this._price, 'Товара нет в наличии'); 
+			this.toggleButton();
 		} else {
-			this._price.textContent = String(`${value} синапсов`);
-			this.setDisabled(this._buttonCard, false);
+			this.setText (this._price, String(`${value} синапсов`)); 
+			this.toggleButton(false);
 		}
 	}
+
+
 
 	get price(): number {
 		if (this._price.textContent === 'Бесценно') {
@@ -107,5 +109,9 @@ export class Card extends Component<ICard> {
 
 	get index(): number {
 		return parseInt(this._index.textContent);
+	}
+
+	protected toggleButton (state: boolean = true) {
+		this.setDisabled(this._buttonCard, state);
 	}
 }

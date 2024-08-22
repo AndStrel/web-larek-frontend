@@ -1,4 +1,4 @@
-import { IPage } from '../types';
+import { IPage, EventsEnum } from '../types';
 import { ensureElement } from '../utils/utils';
 import { Component } from './base/Component';
 import { IEvents } from './base/Events';
@@ -18,7 +18,7 @@ export class Page extends Component<IPage> {
 		this._counter = ensureElement<HTMLElement>('.header__basket-counter');
 
 		this._basket.addEventListener('click', () => {
-			this.events.emit('basket:open');
+			this.events.emit(EventsEnum.BASKET_OPEN);
 		});
 	}
 	// Метод для изменения счетчика корзины на главной странице
@@ -31,10 +31,6 @@ export class Page extends Component<IPage> {
 	}
 	//Метод для установки блокировки страницы
 	set wrapper(value: boolean) {
-		if (value) {
-			this._wrapper.classList.add('page__wrapper_locked');
-		} else {
-			this._wrapper.classList.remove('page__wrapper_locked');
-		}
+		this.toggleClass(this._wrapper, 'page__wrapper_locked');
 	}
 }
